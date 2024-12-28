@@ -1,0 +1,51 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: rgb(248, 248, 248);
+    background-image: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 10vh 10vh;
+}
+
+.letters-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10vh, 1fr));
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    width: 80vw;
+    max-width: 800px;
+}
+
+.letter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    color: white;
+    height: 10vh;
+    width: 10vh;
+    text-align: center;
+    line-height: 1;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.letter p {
+    margin: 0;
+    padding: 0;
+}
+
+.letter .big {
+    font-size: 3vh;
+    font-weight: bold;
+}
+
+.letter .small {
+    font-size: 1.5vh;
+    font-weight: bold;
+}
