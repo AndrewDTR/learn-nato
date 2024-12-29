@@ -1,3 +1,59 @@
-<div>
-    
+---
+const pathname = new URL(Astro.request.url).pathname;
+const currentPath = pathname.slice(1);
+---
+
+<div class="topnav">
+  <a class={currentPath === "" ? "active" : ""} href="/">Practice</a>
+  <a class={currentPath === "reference" ? "active" : ""} href="/reference"
+    >NATO Reference</a
+  >
+  <div class="credit">by Andrew</div>
 </div>
+
+<style>
+  .topnav {
+    background-color: #333;
+    overflow: hidden;
+    font-family: monospace, "Courier New", Courier;
+    position: fixed;
+    top: 0;
+    width: 98%;
+    z-index: 1000;
+    margin: 10px;
+  }
+
+  .topnav a {
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    transition: background-color 0.1s;
+  }
+
+  .topnav a:hover {
+    background-color: #878787;
+    color: rgb(255, 255, 255);
+  }
+
+  .topnav a.active {
+    background-color: #5d5d5d;
+    color: white;
+  }
+
+  .topnav .credit {
+    float: right;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    font-size: 17px;
+  }
+
+  @media screen and (max-width: 400px) {
+    .topnav .credit {
+      display: none;
+    }
+  }
+</style>

@@ -1,7 +1,290 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
+  <section
+    class="flex
+      flex-col
+      items-center
+      justify-center
+      bg-white/80
+      backdrop-blur-sm
+      p-8
+      rounded-md
+      shadow-2xl
+      w-11/12
+      md:w-2/3
+      lg:w-1/2
+      mx-auto
+      font-mono
+      text-gray-800"
+  >
+    <h1 class="text-3xl md:text-4xl font-bold mb-6 text-center">
+      NATO Phonetic Alphabet Challenge
+    </h1>
 
+    <button
+      id="start-challenge"
+      data-state="start"
+      class="px-6
+        py-3
+        text-base
+        text-white
+        bg-blue-600
+        hover:bg-blue-700
+        rounded-md
+        cursor-pointer
+        focus:outline-none
+        focus:ring-4
+        focus:ring-blue-300
+        transition-transform
+        duration-200
+        font-mono
+        hover:scale-105"
+    >
+      Start Challenge
+    </button>
+
+    <p
+      id="generated-letters"
+      class="mt-6
+        p-3
+        border
+        border-gray-300
+        rounded
+        w-full
+        max-w-xl
+        min-h-[3rem]
+        text-center
+        text-xl
+        font-semibold
+        bg-gray-100
+        font-mono"
+    >
+      Press the button to generate four letters.
+    </p>
+
+    <p
+      id="transcription"
+      class="mt-4
+        p-3
+        border
+        border-gray-300
+        rounded
+        w-full
+        max-w-xl
+        min-h-[3rem]
+        text-center
+        text-lg
+        bg-gray-50
+        font-mono"
+    >
+      ...
+    </p>
+
+    <p
+      id="feedback"
+      class="mt-4
+         text-lg
+         font-medium
+         transition-colors
+         duration-200
+         font-mono
+         min-h-[2.5rem]"
+    >
+    </p>
+  </section>
+
+  <script>
+    const startButton = document.getElementById("start-challenge");
+    const generatedLettersDisplay =
+      document.getElementById("generated-letters");
+    const textDisplay = document.getElementById("transcription");
+    const display = document.getElementById("feedback");
+
+    let isChallengeActive = false;
+    let randomLetters = "";
+    let expectedWords = "";
+
+    // alphabet dict
+    const nato = {
+      A: "Alpha",
+      B: "Bravo",
+      C: "Charlie",
+      D: "Delta",
+      E: "Echo",
+      F: "Foxtrot",
+      G: "Golf",
+      H: "Hotel",
+      I: "India",
+      J: "Juliet",
+      K: "Kilo",
+      L: "Lima",
+      M: "Mike",
+      N: "November",
+      O: "Oscar",
+      P: "Papa",
+      Q: "Quebec",
+      R: "Romeo",
+      S: "Sierra",
+      T: "Tango",
+      U: "Uniform",
+      V: "Victor",
+      W: "Whiskey",
+      X: "X-ray",
+      Y: "Yankee",
+      Z: "Zulu",
+    };
+
+    function generateUniqueRandomLetters() {
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let result = "";
+      const usedIndexes = new Set();
+
+      while (result.length < 4) {
+        const randomIndex = Math.floor(Math.random() * letters.length);
+        if (!usedIndexes.has(randomIndex)) {
+          usedIndexes.add(randomIndex);
+          result += letters[randomIndex];
+        }
+      }
+      return result;
+    }
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const speech = new SpeechRecognition();
+      speech.lang = "en-US";
+      speech.interimResults = false;
+      speech.continuous = true;
+
+      function resetToInitialState() {
+        speech.stop();
+        isChallengeActive = false;
+        startButton.textContent = "Start Challenge";
+        startButton.dataset.state = "start";
+        startButton.classList.remove(
+          "bg-red-600",
+          "hover:bg-red-700",
+          "bg-green-600"
+        );
+        startButton.classList.add("bg-blue-600", "hover:bg-blue-700");
+        startButton.disabled = false;
+        generatedLettersDisplay.textContent =
+          "Press the button to generate letters.";
+        textDisplay.textContent = "...";
+        display.textContent = "";
+      }
+
+      let accumulatedTranscript = "";
+
+      speech.onresult = (event) => {
+        accumulatedTranscript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          accumulatedTranscript += event.results[i][0].transcript;
+        }
+        textDisplay.textContent = accumulatedTranscript;
+
+        if (!isChallengeActive) return;
+
+        const wordsSpoken = accumulatedTranscript.trim().split(/\s+/).length;
+
+        // at least 4 words are spoken
+        if (wordsSpoken >= 4) {
+          const userSaid = accumulatedTranscript.toLowerCase().trim();
+          if (userSaid === expectedWords) {
+            // correct
+            display.classList.remove("text-red-600");
+            display.classList.add("text-green-600");
+            display.textContent = "Correct!";
+
+            // disable the button when the answer is correct
+            startButton.disabled = true;
+            startButton.textContent = "✔️";
+            startButton.classList.remove("bg-red-600", "hover:bg-red-700");
+            startButton.classList.add("bg-green-600");
+
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 },
+              decay: 1,
+            });
+
+            setTimeout(() => {
+              resetToInitialState();
+            }, 2000);
+          } else {
+            // incorrect
+            display.classList.remove("text-green-600");
+            display.classList.add("text-red-600");
+            display.textContent = `Incorrect. Should've been: ${expectedWords}`;
+            setTimeout(() => {
+              resetToInitialState();
+            }, 5000);
+          }
+        }
+      };
+
+      speech.onerror = (event) => {
+        resetToInitialState();
+      };
+
+      startButton.addEventListener("click", () => {
+        const state = startButton.dataset.state;
+
+        if (state === "start") {
+          isChallengeActive = true;
+          randomLetters = generateUniqueRandomLetters();
+          generatedLettersDisplay.textContent = randomLetters;
+
+          // map out the right words
+          expectedWords = randomLetters
+            .split("")
+            .map((letter) => nato[letter])
+            .join(" ")
+            .toLowerCase();
+
+          accumulatedTranscript = "";
+
+          textDisplay.textContent = "Listening...";
+          display.textContent = "";
+
+          startButton.textContent = "?";
+          startButton.dataset.state = "hint";
+          startButton.classList.remove("bg-blue-600", "hover:bg-blue-700");
+          startButton.classList.add("bg-red-600", "hover:bg-red-700");
+
+          speech.start();
+          // hint
+        } else if (state === "hint") {
+          display.classList.remove("text-green-600", "text-red-600");
+          display.classList.add("text-blue-600");
+          display.textContent = `Hint: ${expectedWords}`;
+
+          startButton.textContent = "X";
+          startButton.dataset.state = "abort";
+        } else if (state === "abort") {
+          resetToInitialState();
+        }
+      });
+    } else {
+      generatedLettersDisplay.textContent =
+        "Speech Recognition is not supported in this browser.";
+      startButton.disabled = true;
+      startButton.classList.remove(
+        "bg-blue-600",
+        "hover:bg-blue-700",
+        "cursor-pointer"
+      );
+      startButton.classList.add("bg-gray-400", "cursor-not-allowed");
+    }
+  </script>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@tsparticles/confetti@3.0.3/tsparticles.confetti.bundle.min.js"
+  ></script>
 </Layout>
