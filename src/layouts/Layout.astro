@@ -1,20 +1,27 @@
 ---
 import "../styles/global.css";
-import Header from '../components/Header.astro';
-
+import Header from "../components/Header.astro";
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Learn Nato</title>
-	</head>
-	<body>
-		<Header></Header>
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Learn Nato</title>
+    <meta property="og:image" content="/main-og.png" />
+    <meta property="og:title" content="NATO Alphabet Challenge" />
+    <meta
+      property="og:description"
+      content="To learn/test yourself on the NATO phonetic alphabet used in aviation pronounciation."
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+  </head>
+  <body>
+    <Header />
+    <slot />
+  </body>
 </html>
